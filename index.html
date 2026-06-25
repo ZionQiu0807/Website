@@ -1015,13 +1015,7 @@ img{max-width:100%;display:block;}
     </div>
   </section>
 
-  <section class="padding-global" style="padding-bottom:6rem;">
-    <div class="hr" style="background:#333;margin-bottom:2rem;"></div>
-    <div class="eyebrow-wrap"><span class="eyebrow-dot"></span>留言板 · GUESTBOOK</div>
-    <div id="guestbookList" style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1.2rem;">
-      <p class="text-secondary" style="font-size:.85rem;">加载中…</p>
-    </div>
-  </section>
+
 
   <div class="padding-global footer-legal">
     <span>© 2026 邱炜畅 Zion Qiu</span>
@@ -1082,8 +1076,7 @@ img{max-width:100%;display:block;}
     // 3. 随笔日常（动态渲染卡片）
     await loadJournalEntries();
 
-    // 4. 留言板
-    await loadGuestbook();
+
   }
 
   async function loadJournalEntries(){
@@ -1123,27 +1116,7 @@ img{max-width:100%;display:block;}
     return div.innerHTML;
   }
 
-  async function loadGuestbook(){
-    if (typeof SB === 'undefined') return;
-    const list = document.getElementById('guestbookList');
-    if (!list) return;
-    const messages = await SB.getPublicMessages();
-    if (!messages.length) {
-      list.innerHTML = `<p class="text-secondary" style="font-size:.85rem;">还没有留言，来留下第一条吧～</p>`;
-      return;
-    }
-    list.innerHTML = messages.map(m => {
-      const date = new Date(m.created_at).toLocaleDateString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit'});
-      return `
-        <div style="border-bottom:1px solid #2a2a2a;padding-bottom:1rem;">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem;">
-            <span style="font-weight:400;color:#fff;">${escapeHtml(m.name)}</span>
-            <span style="font-size:.72rem;color:#777;letter-spacing:.04em;">${date}</span>
-          </div>
-          <div style="font-size:.92rem;color:#bbb;line-height:1.6;">${escapeHtml(m.message)}</div>
-        </div>`;
-    }).join('');
-  }
+
 
   // ---- contact form ----
   async function submitMessage(){
