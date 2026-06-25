@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>邱炜畅 · Zion Qiu</title>
+<script src="supabase-config.js"></script>
+<style>
+@font-face {
+  font-family: 'InterLight';
+  src: local('Inter');
+}
+
+:root{
+  --bg: #FFFEF7;
+  --ink: #0A0A0A;
+  --ink-soft: #555;
+  --line: #DEDBC9;
+  --accent: #FFD001;
+  --white: #FFFEF7;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'PingFang SC','Hiragino Sans GB','Helvetica Neue',Arial,sans-serif;
+  font-weight:300;
+  letter-spacing:-0.01em;
+  line-height:1.4;
+  overflow-x:hidden;
+}
+
+img{max-width:100%;display:block;}
+
+/* ============ NAV ============ */
+.section-nav{
+  position:fixed; inset:0 0 auto 0;
+  z-index:500;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.4rem 2rem;
+  pointer-events:none;
+  mix-blend-mode:difference;
+}
+.logo-link{
+  pointer-events:auto;
+  font-size:.85rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--white);
+  text-decoration:none;
+  font-weight:400;
+}
+.menu-button{
+  pointer-events:auto;
+  background:var(--white);
+  color:var(--ink);
+  border-radius:100px;
+  padding:.7rem 1.3rem;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  border:none;
+  font-family:inherit;
+  font-weight:400;
+}
+
+.menu-overlay{
+  position:fixed; inset:0;
+  background:var(--ink);
+  color:var(--white);
+  z-index:600;
+  display:none;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:7rem 2rem 2.5rem;
+}
+.menu-overlay.open{ display:flex; }
+.menu-close{
+  position:absolute; top:1.4rem; right:2rem;
+  background:var(--white); color:var(--ink);
+  border-radius:100px; padding:.7rem 1.3rem;
+  font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+  border:none; font-family:inherit; font-weight:400;
+}
+.menu-list{ list-style:none; }
+.menu-list li{ border-top:1px solid #333; }
+.menu-list li:last-child{ border-bottom:1px solid #333; }
+.menu-list a{
+  display:block;
+  color:var(--white); text-decoration:none;
+  font-size:clamp(2.2rem,7vw,4rem);
+  font-weight:300; letter-spacing:-0.03em;
+  padding:.5rem 0;
+  transition:opacity .2s;
+}
+.menu-list a:hover{ opacity:.5; }
+.menu-foot{
+  display:flex; justify-content:space-between;
+  font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+  color:#999;
+  flex-wrap:wrap; gap:.5rem;
+}
+
+/* ============ PAGE / SECTION ============ */
+.page{ display:none; }
+.page.active{ display:block; }
+
+.theme-light{ background:var(--bg); color:var(--ink); }
+.theme-dark{ background:var(--ink); color:var(--white); }
+.theme-dark .line{ background:#333 !important; }
+.theme-dark .eyebrow-dot{ background:var(--white); }
+
+.padding-global{ padding-left:2rem; padding-right:2rem; }
+.padding-section-large{ padding-top:7rem; padding-bottom:7rem; }
+.padding-section-small{ padding-top:2.5rem; padding-bottom:2.5rem; }
+.container-full{ max-width:90rem; margin:0 auto; }
+
+/* ============ EYEBROW / TAG ============ */
+.eyebrow-wrap{
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.78rem; letter-spacing:.1em; text-transform:uppercase;
+  margin-bottom:1.5rem;
+}
+.eyebrow-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--ink); flex-shrink:0;
+}
+.tag{
+  display:inline-flex; align-items:center;
+  font-size:.78rem; letter-spacing:.05em; text-transform:uppercase;
+  text-decoration:underline;
+  font-weight:400;
+}
+
+/* ============ HEADINGS ============ */
+.h1{
+  font-size:clamp(2.6rem,8vw,6.5rem);
+  font-weight:300; line-height:.98; letter-spacing:-0.04em;
+}
+.h2{ font-size:clamp(2.2rem,6vw,4.6rem); font-weight:300; line-height:1; letter-spacing:-0.04em; }
+.h3{ font-size:clamp(1.7rem,4vw,3.4rem); font-weight:300; line-height:1; letter-spacing:-0.04em; }
+.h4{ font-size:clamp(1.4rem,3vw,2.5rem); font-weight:300; line-height:1; letter-spacing:-0.03em; }
+.h5{ font-size:clamp(1.2rem,2.4vw,1.8rem); font-weight:300; line-height:1; letter-spacing:-0.02em; }
+.text-large{ font-size:1.2rem; line-height:1.5; }
+.text-medium{ font-size:1.05rem; line-height:1.55; }
+.text-secondary{ color:var(--ink-soft); }
+.theme-dark .text-secondary{ color:#999; }
+.max-w{ max-width:60ch; }
+
+/* ============ BUTTON ============ */
+.btn{
+  display:inline-flex; align-items:center; gap:.75rem;
+  border:1px solid var(--ink);
+  border-radius:100px;
+  padding:.85rem 1.3rem .85rem 1.6rem;
+  text-decoration:none;
+  font-size:.78rem; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink); background:transparent;
+  transition:background .3s, color .3s;
+  font-family:inherit; font-weight:400;
+}
+.btn:hover{ background:var(--ink); color:var(--bg); }
+.theme-dark .btn{ border-color:var(--white); color:var(--white); }
+.theme-dark .btn:hover{ background:var(--white); color:var(--ink); }
+.btn-icon{
+  width:1.7rem; height:1.7rem; border-radius:50%;
+  background:var(--ink); color:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; flex-shrink:0;
+}
+.theme-dark .btn-icon{ background:var(--white); color:var(--ink); }
+
+/* ============ DIVIDER LINE ============ */
+.hr{ height:1px; background:var(--line); width:100%; }
+.line-v{ width:1px; background:var(--line); }
+
+/* ============ MASKED FULL-BLEED NAME ============ */
+.mask-hero{
+  position:relative;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+.mask-hero-dot{
+  position:absolute;
+  top:1.6rem; left:50%;
+  transform:translateX(-50%);
+  z-index:2;
+}
+.mask-hero-dot span{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--ink); display:inline-block;
+}
+.mask-name-row{
+  position:relative;
+  width:100vw;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:visible;
+}
+.mask-name{
+  position:relative;
+  margin:0;
+  display:inline-block;
+  text-align:center;
+  font-family:'Arial Narrow', 'PingFang SC', Arial, sans-serif;
+  font-weight:900;
+  font-size:24.38vw;
+  line-height:.8;
+  letter-spacing:-0.02em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  transform:scaleX(0.82);
+  transform-origin:center;
+  background-image:
+    radial-gradient(ellipse 75% 65% at 28% 35%, #cfe3e6 0%, transparent 60%),
+    radial-gradient(ellipse 65% 55% at 78% 65%, #f3f1e6 0%, transparent 55%),
+    linear-gradient(135deg, #aebcbe 0%, #7e8a8c 35%, #d8d4c4 60%, #9fb0b2 100%);
+  background-size:130% 160%;
+  background-position:center;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  animation:mask-pan 14s ease-in-out infinite alternate;
+}
+@keyframes mask-pan{
+  0%   { background-position: 30% 40%; }
+  100% { background-position: 70% 60%; }
+}
+.mask-name-sub{
+  position:absolute;
+  bottom:2.2rem; left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  font-size:.78rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  z-index:2;
+}
+@media (max-width:700px){
+  .mask-name{ font-size:22.7vw; transform:scaleX(0.86); }
+  .mask-name-sub{ font-size:.62rem; white-space:normal; padding:0 1.5rem; }
+}
+
+/* ============ HOME HERO ============ */
+.hero{
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding-top:1rem; padding-bottom:4rem;
+  position:relative;
+}
+.hero-accent-strip{
+  height:.4rem; width:100%;
+}
+.hero-photo-row{
+  display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem;
+}
+.hero-photo{
+  width:64px; height:64px; border-radius:50%;
+  background:var(--ink); color:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; flex-shrink:0;
+}
+.hero-name-block{ margin-bottom:2.5rem; }
+.hero-tags{
+  display:flex; flex-wrap:wrap; gap:.6rem .6rem;
+  margin:2rem 0;
+}
+.pill{
+  border:1px solid var(--ink);
+  border-radius:100px;
+  padding:.5rem 1.1rem;
+  font-size:.78rem; letter-spacing:.04em;
+}
+.hero-bottom-row{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  flex-wrap:wrap; gap:2rem;
+  margin-top:3rem;
+  padding-top:2rem;
+  border-top:1px solid var(--line);
+}
+.hero-slogan{
+  font-size:.85rem; color:var(--ink-soft);
+  max-width:32ch; line-height:1.6;
+}
+
+/* carousel placeholder */
+.carousel-strip{
+  display:flex; gap:1rem; overflow-x:auto;
+  margin:2.5rem 0;
+  scrollbar-width:none;
+  padding-bottom:.5rem;
+}
+.carousel-strip::-webkit-scrollbar{ display:none; }
+.carousel-card{
+  flex:0 0 240px; aspect-ratio:4/5;
+  background:#EFEBDB;
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.75rem; color:var(--ink-soft);
+  text-align:center; padding:1rem;
+  letter-spacing:.04em;
+}
+
+/* nav quick links grid */
+.quick-grid{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+.quick-cell{
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:2rem 1.5rem;
+  text-decoration:none; color:var(--ink);
+  display:flex; flex-direction:column; justify-content:space-between;
+  min-height:140px;
+  transition:background .25s;
+}
+.quick-cell:hover{ background:rgba(0,0,0,.04); }
+.quick-cell .qnum{ font-size:.72rem; letter-spacing:.08em; color:var(--ink-soft); }
+.quick-cell .qname{ font-size:1.3rem; font-weight:300; letter-spacing:-0.02em; }
+
+/* ============ ABOUT GRID ============ */
+.about-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  border-top:1px solid var(--line);
+}
+.about-cell{
+  border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line);
+  padding:3rem 2.5rem;
+}
+.about-cell:nth-child(even){ border-right:none; }
+.info-line{
+  display:flex; justify-content:space-between; gap:1rem;
+  padding:.6rem 0;
+  border-bottom:1px solid var(--line);
+  font-size:.92rem;
+}
+.info-line:last-child{ border-bottom:none; }
+.info-line .lbl{ color:var(--ink-soft); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; flex-shrink:0; padding-top:.15rem;}
+.info-line .val{ text-align:right; }
+
+.edu-block{ margin-bottom:2rem; }
+.edu-block:last-child{ margin-bottom:0; }
+.edu-school{ font-size:1.15rem; font-weight:400; margin-bottom:.2rem; }
+.edu-meta{ font-size:.78rem; color:var(--ink-soft); letter-spacing:.03em; margin-bottom:.8rem; text-transform:uppercase; }
+.edu-desc{ font-size:.92rem; color:var(--ink-soft); line-height:1.65; }
+
+.honor-group{ margin-bottom:1.6rem; }
+.honor-group h4{
+  font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-soft); font-weight:400; margin-bottom:.7rem;
+}
+.honor-list{ list-style:none; }
+.honor-list li{
+  font-size:.9rem; padding:.5rem 0;
+  border-top:1px solid var(--line);
+  display:flex; gap:.6rem;
+}
+.honor-list li::before{ content:'—'; color:var(--ink-soft); flex-shrink:0; }
+
+.skill-group{ margin-bottom:1.6rem; }
+.skill-group h4{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:400; margin-bottom:.8rem; }
+.skill-pills{ display:flex; flex-wrap:wrap; gap:.5rem; }
+
+/* ============ STAGE PAGE ============ */
+.drama-hero{
+  text-align:left;
+  padding-top:8rem;
+  padding-bottom:3rem;
+  position:relative;
+}
+.drama-cn{
+  font-size:clamp(3rem,12vw,8rem);
+  font-weight:300; letter-spacing:-.04em; line-height:.95;
+}
+.drama-en{
+  font-size:1.1rem; color:#999; letter-spacing:.02em;
+  margin-top:1rem;
+}
+.role-pills{ display:flex; flex-wrap:wrap; gap:.6rem; margin-top:2rem; }
+.role-pill{
+  border:1px solid var(--white); border-radius:100px;
+  padding:.5rem 1.1rem; font-size:.78rem; letter-spacing:.04em;
+}
+
+.stage-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  border-top:1px solid #333;
+}
+.stage-cell{
+  border-bottom:1px solid #333; border-right:1px solid #333;
+  padding:3rem 2.5rem;
+}
+.stage-cell:nth-child(even){ border-right:none; }
+.stage-cell h4{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:#999; font-weight:400; margin-bottom:1.5rem;}
+
+.stat-trio{ display:flex; gap:2rem; margin-top:1rem; }
+.stat-item .num{ font-size:2.6rem; font-weight:300; letter-spacing:-0.03em; }
+.stat-item .lbl{ font-size:.75rem; color:#999; letter-spacing:.04em; text-transform:uppercase; margin-top:.3rem; }
+
+.media-pill{
+  display:inline-block; border:1px solid #444; border-radius:100px;
+  padding:.4rem 1rem; font-size:.78rem; margin:.3rem .4rem 0 0; color:#ccc;
+}
+
+/* ============ HORIZONTAL SCROLL GALLERY ============ */
+.scroll-gallery-wrap{
+  overflow-x:auto; scrollbar-width:none;
+  padding:0 2rem;
+}
+.scroll-gallery-wrap::-webkit-scrollbar{ display:none; }
+.scroll-gallery{
+  display:flex; gap:1.2rem;
+  padding-bottom:1rem;
+}
+.scroll-card{
+  flex:0 0 280px;
+  display:flex; flex-direction:column; gap:1rem;
+}
+.scroll-card-img{
+  aspect-ratio:3/4;
+  background:#EFEBDB;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.75rem; color:var(--ink-soft); text-align:center; padding:1rem;
+  border:1px solid var(--line);
+}
+.theme-dark .scroll-card-img{
+  background:#1a1a1a; border-color:#333; color:#777;
+}
+.scroll-card-title{ font-size:1rem; font-weight:400; }
+.scroll-card-meta{ font-size:.78rem; color:var(--ink-soft); letter-spacing:.03em; text-transform:uppercase; }
+.theme-dark .scroll-card-meta{ color:#888; }
+
+.progress-track{
+  height:1px; background:var(--line); width:100%; margin-top:1.5rem; position:relative;
+}
+.theme-dark .progress-track{ background:#333; }
+.progress-bar{ height:1px; background:var(--ink); width:25%; }
+.theme-dark .progress-bar{ background:var(--white); }
+
+/* ============ MEDIA PAGE ============ */
+.platform-grid{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+}
+.platform-cell{
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding:2.5rem 2rem;
+}
+.platform-cell:last-child{ border-right:none; }
+.platform-name{ font-size:1.5rem; font-weight:300; margin-bottom:.3rem; }
+.platform-handle{ font-size:.8rem; color:var(--ink-soft); margin-bottom:1.2rem; }
+
+.stat-bar-grid{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.stat-bar-cell{
+  border-right:1px solid var(--line);
+  padding:2rem 1.5rem;
+}
+.stat-bar-cell:last-child{ border-right:none; }
+.stat-bar-cell .num{ font-size:2.2rem; font-weight:300; }
+.stat-bar-cell .lbl{ font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin-top:.4rem; }
+
+/* ============ PORTFOLIO TEXT LIST ============ */
+.text-list{ border-top:1px solid var(--line); }
+.text-row{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:1.5rem; padding:1.3rem 0;
+  border-bottom:1px solid var(--line);
+}
+.text-row .tname{ font-size:1.05rem; flex:1; }
+.text-row .ttype{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); flex-shrink:0; }
+.text-row .tlang{ font-size:.78rem; color:var(--ink-soft); flex-shrink:0; width:3.5rem; text-align:right; }
+
+/* ============ JOURNAL ============ */
+.journal-grid{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line); border-left:1px solid var(--line);
+}
+.journal-cell{
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding:2.2rem 1.8rem;
+  display:flex; flex-direction:column; min-height:280px;
+}
+.journal-cat{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:1rem; }
+.journal-title{ font-size:1.2rem; font-weight:400; margin-bottom:.8rem; line-height:1.3; }
+.journal-excerpt{ font-size:.88rem; color:var(--ink-soft); line-height:1.6; flex:1; }
+.journal-date{ font-size:.72rem; color:var(--ink-soft); margin-top:1rem; letter-spacing:.04em; }
+
+/* ============ CONTACT ============ */
+.contact-grid{
+  display:grid; grid-template-columns:5fr 7fr;
+  gap:3rem;
+}
+.contact-row{
+  display:flex; justify-content:space-between; padding:1.1rem 0;
+  border-bottom:1px solid #333;
+  font-size:.95rem;
+}
+.contact-row .lbl{ color:#999; font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; }
+.social-row{ display:flex; gap:.8rem; margin-top:2rem; }
+.social-pill{
+  flex:1; text-align:center; border:1px solid #444; border-radius:100px;
+  padding:.9rem; text-decoration:none; color:var(--white);
+  font-size:.78rem; letter-spacing:.04em; text-transform:uppercase;
+  transition:background .25s;
+}
+.social-pill:hover{ background:#1a1a1a; }
+
+.form-input{
+  width:100%; background:transparent; border:none;
+  border-bottom:1px solid #444; color:var(--white);
+  padding:1rem 0; font-size:1.3rem; font-weight:300;
+  font-family:inherit;
+}
+.form-input::placeholder{ color:#666; }
+.form-input:focus{ outline:none; border-color:var(--white); }
+.form-label{ font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:#888; margin-bottom:.4rem; display:block; }
+.form-group{ margin-bottom:2rem; }
+
+.footer-legal{
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+  padding:2rem 0;
+  font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#777;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:900px){
+  .padding-global{ padding-left:1.2rem; padding-right:1.2rem; }
+  .padding-section-large{ padding-top:4rem; padding-bottom:4rem; }
+  .about-grid, .stage-grid{ grid-template-columns:1fr; }
+  .about-cell, .stage-cell{ border-right:none !important; }
+  .platform-grid{ grid-template-columns:1fr; }
+  .platform-cell{ border-right:none; }
+  .stat-bar-grid{ grid-template-columns:repeat(2,1fr); }
+  .stat-bar-cell:nth-child(even){ border-right:none; }
+  .journal-grid{ grid-template-columns:1fr; }
+  .journal-cell{ border-right:none; }
+  .quick-grid{ grid-template-columns:1fr; }
+  .quick-cell{ border-right:none; }
+  .contact-grid{ grid-template-columns:1fr; gap:3rem; }
+  .text-row{ flex-wrap:wrap; }
+  .hero-bottom-row{ flex-direction:column; align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="section-nav">
+  <a href="#" class="logo-link" onclick="showPage('home');return false;">邱炜畅 · ZQ</a>
+  <button class="menu-button" onclick="toggleMenu(true)">菜单 Menu</button>
+</nav>
+
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menuOverlay">
+  <button class="menu-close" onclick="toggleMenu(false)">关闭 Close</button>
+  <ul class="menu-list">
+    <li><a href="#" onclick="navTo('home')">首页 <span style="font-size:.9rem;color:#666;">／ Home</span></a></li>
+    <li><a href="#" onclick="navTo('about')">关于我 <span style="font-size:.9rem;color:#666;">／ About</span></a></li>
+    <li><a href="#" onclick="navTo('stage')">舞台创作 <span style="font-size:.9rem;color:#666;">／ Stage</span></a></li>
+    <li><a href="#" onclick="navTo('media')">自媒体 <span style="font-size:.9rem;color:#666;">／ Media</span></a></li>
+    <li><a href="#" onclick="navTo('portfolio')">作品集 <span style="font-size:.9rem;color:#666;">／ Works</span></a></li>
+    <li><a href="#" onclick="navTo('journal')">随笔日常 <span style="font-size:.9rem;color:#666;">／ Journal</span></a></li>
+    <li><a href="#" onclick="navTo('contact')">联系我 <span style="font-size:.9rem;color:#666;">／ Contact</span></a></li>
+  </ul>
+  <div class="menu-foot">
+    <span>深圳技术大学 · 英语专业</span>
+    <span>2026</span>
+  </div>
+</div>
+
+<!-- ══════════ PAGE 1 : HOME ══════════ -->
+<div class="page active theme-light" id="home">
+  <div class="hero-accent-strip" style="background:var(--accent);"></div>
+
+  <section class="mask-hero" aria-label="邱炜畅 Zion Qiu">
+    <div class="mask-hero-dot"><span></span></div>
+    <div class="mask-name-row">
+      <h1 class="mask-name">Zion Qiu</h1>
+    </div>
+    <p class="mask-name-sub">邱炜畅 · 英语专业学子 / 双语创作者 / 舞台爱好者</p>
+  </section>
+
+  <header class="hero padding-global">
+    <div class="container-full" style="width:100%;">
+
+      <div class="eyebrow-wrap">
+        <span class="eyebrow-dot"></span>
+        WELCOME · 欢迎来到我的世界
+      </div>
+
+      <div class="hero-photo-row">
+        <div class="hero-photo" id="img-home-avatar" data-image="home.avatar">邱</div>
+        <div>
+          <div style="font-size:.8rem;letter-spacing:.04em;color:var(--ink-soft);" data-content="home.school">Shenzhen Technology University</div>
+          <div style="font-size:.8rem;letter-spacing:.04em;color:var(--ink-soft);" data-content="home.major">English · Class of 2027</div>
+        </div>
+      </div>
+
+      <p class="text-large max-w" data-content="home.intro">
+        英语专业学子 · 双语创作者 · 舞台爱好者 · 自媒体达人。<br>
+        用语言丈量世界，用舞台诠释人生。
+      </p>
+
+      <div class="hero-tags">
+        <span class="pill">英语能力</span>
+        <span class="pill">双语话剧</span>
+        <span class="pill">内容创作</span>
+        <span class="pill">公众演讲</span>
+        <span class="pill">视频剪辑</span>
+        <span class="pill">跨文化交流</span>
+      </div>
+
+      <div class="carousel-strip">
+        <div class="carousel-card" id="img-home-carousel-1" data-image="home.carousel.1">话剧剧照<br>预留位</div>
+        <div class="carousel-card" id="img-home-carousel-2" data-image="home.carousel.2">自媒体封面<br>预留位</div>
+        <div class="carousel-card" id="img-home-carousel-3" data-image="home.carousel.3">活动现场<br>预留位</div>
+        <div class="carousel-card" id="img-home-carousel-4" data-image="home.carousel.4">生活随拍<br>预留位</div>
+      </div>
+
+      <div class="hero-bottom-row">
+        <p class="hero-slogan" data-content="home.slogan">"用语言丈量世界，用舞台诠释人生"<br>Measuring the world with language, interpreting life through the stage.</p>
+        <a href="#" class="btn" onclick="navTo('contact');return false;">
+          <span class="btn-icon">→</span> 联系我
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <section class="quick-grid">
+    <a href="#" class="quick-cell" onclick="navTo('about');return false;">
+      <span class="qnum">01 · ABOUT</span>
+      <span class="qname">关于我</span>
+    </a>
+    <a href="#" class="quick-cell" onclick="navTo('stage');return false;">
+      <span class="qnum">02 · STAGE</span>
+      <span class="qname">舞台创作</span>
+    </a>
+    <a href="#" class="quick-cell" onclick="navTo('media');return false;">
+      <span class="qnum">03 · MEDIA</span>
+      <span class="qname">自媒体空间</span>
+    </a>
+    <a href="#" class="quick-cell" onclick="navTo('portfolio');return false;">
+      <span class="qnum">04 · WORKS</span>
+      <span class="qname">作品集</span>
+    </a>
+    <a href="#" class="quick-cell" onclick="navTo('journal');return false;">
+      <span class="qnum">05 · JOURNAL</span>
+      <span class="qname">随笔日常</span>
+    </a>
+    <a href="#" class="quick-cell" onclick="navTo('contact');return false;">
+      <span class="qnum">06 · CONTACT</span>
+      <span class="qname">联系我</span>
+    </a>
+  </section>
+
+  <footer class="padding-global" style="padding-top:2rem;padding-bottom:2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);">
+    <span>© 2026 邱炜畅 Zion Qiu</span>
+    <span>Shenzhen, China</span>
+  </footer>
+</div>
+
+<!-- ══════════ PAGE 2 : ABOUT ══════════ -->
+<div class="page theme-light" id="about">
+  <header class="padding-global" style="padding-top:9rem;padding-bottom:3rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#EE77CF;"></span>ABOUT ME · 认识我</div>
+    <h1 class="h2">关于这个人</h1>
+  </header>
+
+  <section class="about-grid padding-global" style="padding-left:0;padding-right:0;">
+
+    <div class="about-cell">
+      <h4 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:1.5rem;">个人简介</h4>
+      <div class="info-line"><span class="lbl">姓名</span><span class="val">邱炜畅 · Zion Qiu</span></div>
+      <div class="info-line"><span class="lbl">籍贯</span><span class="val" data-content="about.hometown">（预留填写）</span></div>
+      <div class="info-line"><span class="lbl">就读院校</span><span class="val">深圳技术大学</span></div>
+      <div class="info-line"><span class="lbl">专业</span><span class="val">英语</span></div>
+      <div class="info-line"><span class="lbl">性格特质</span><span class="val" data-content="about.personality">（预留填写）</span></div>
+      <div class="info-line"><span class="lbl">兴趣爱好</span><span class="val">双语话剧 / 自媒体 / 公众演讲</span></div>
+      <p class="text-secondary text-medium" style="margin-top:1.5rem;" data-content="about.life_attitude">
+        （预留个人生活态度文案位——描述你对学习、创作与生活的理解……）
+      </p>
+    </div>
+
+    <div class="about-cell">
+      <h4 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:1.5rem;">个人技能</h4>
+      <div class="skill-group">
+        <h4>语言能力</h4>
+        <div class="skill-pills">
+          <span class="pill">英语（专四优秀）</span>
+          <span class="pill">粤语（日常沟通）</span>
+          <span class="pill">普通话</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>工具能力</h4>
+        <div class="skill-pills">
+          <span class="pill">Office</span>
+          <span class="pill">AI 工具</span>
+          <span class="pill">剪映</span>
+          <span class="pill">Photoshop</span>
+          <span class="pill">Premiere</span>
+          <span class="pill">After Effects</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>特长能力</h4>
+        <div class="skill-pills">
+          <span class="pill">双语创作</span>
+          <span class="pill">舞台表演</span>
+          <span class="pill">剧本编写</span>
+          <span class="pill">公众演讲</span>
+          <span class="pill">短视频创作</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-cell">
+      <h4 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:1.5rem;">教育经历</h4>
+      <div class="edu-block">
+        <div class="edu-school">深圳技术大学</div>
+        <div class="edu-meta">英语专业 · 2023.09 — 2027.06</div>
+        <div class="edu-desc">专注英语语言与文学研究，兼修跨文化传播与双语内容创作。参与多项国际交流与赛事实践。</div>
+        <div style="margin-top:.8rem;"><span class="pill" style="font-size:.72rem;" data-content="about.gpa">GPA 待填写</span> <span class="pill" style="font-size:.72rem;" data-content="about.rank">专业排名 待填写</span></div>
+      </div>
+      <div class="edu-block">
+        <div class="edu-school">瑞士西北应用科学与艺术大学</div>
+        <div class="edu-meta">商业沟通线上跨文化交流项目 · 2025.03 — 2025.07</div>
+        <div class="edu-desc">与多国同学协作完成商业沟通项目，深入体验跨文化沟通差异，提升国际化视野与英语商务表达能力。</div>
+      </div>
+    </div>
+
+    <div class="about-cell">
+      <h4 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:1.5rem;">荣誉与履历</h4>
+      <div class="honor-group">
+        <h4>国家级奖项</h4>
+        <ul class="honor-list">
+          <li data-content="about.honor.national.1">国家级英语赛事奖项（预留填写）</li>
+          <li data-content="about.honor.national.2">全国英语演讲 / 口译类荣誉（预留填写）</li>
+        </ul>
+      </div>
+      <div class="honor-group">
+        <h4>省级奖项</h4>
+        <ul class="honor-list">
+          <li data-content="about.honor.provincial.1">省级英语辩论赛事奖项（预留填写）</li>
+          <li data-content="about.honor.provincial.2">省级英语写作竞赛荣誉（预留填写）</li>
+        </ul>
+      </div>
+      <div class="honor-group">
+        <h4>市级及其他</h4>
+        <ul class="honor-list">
+          <li data-content="about.honor.city.1">市级英语演讲、文艺赛事荣誉（预留填写）</li>
+          <li data-content="about.honor.city.2">演讲辩论赛事 · 评委工作经历（预留填写）</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- ══════════ PAGE 3 : STAGE ══════════ -->
+<div class="page theme-dark" id="stage">
+  <header class="drama-hero padding-global">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#48D1D6;"></span>STAGE & CREATION · 舞台创作</div>
+    <h1 class="drama-cn">生死营救</h1>
+    <p class="drama-en">A Bilingual Red Drama · Life &amp; Death Rescue</p>
+    <div class="role-pills">
+      <span class="role-pill">项目负责人</span>
+      <span class="role-pill">现场导演</span>
+      <span class="role-pill">主演</span>
+      <span class="role-pill">中英双语红色话剧</span>
+    </div>
+  </header>
+
+  <section class="stage-grid">
+    <div class="stage-cell">
+      <h4>项目基础</h4>
+      <p class="text-secondary text-medium" style="margin-bottom:1rem;">
+        <strong style="color:#fff;font-weight:400;">合作单位</strong><br><span data-content="stage.partner">（预留填写：联合出品 / 主办单位）</span>
+      </p>
+      <p class="text-secondary text-medium" style="margin-bottom:1rem;">
+        <strong style="color:#fff;font-weight:400;">项目周期</strong><br><span data-content="stage.duration">（预留填写：起止时间）</span>
+      </p>
+      <p class="text-secondary text-medium">
+        <strong style="color:#fff;font-weight:400;">创作背景</strong><br><span data-content="stage.background">（预留文案：讲述话剧诞生的历史背景与创作初衷……）</span>
+      </p>
+    </div>
+
+    <div class="stage-cell">
+      <h4>创作与幕后</h4>
+      <p class="text-secondary text-medium" style="margin-bottom:.7rem;" data-content="stage.behind.1">史料调研 — 深入查阅历史文献，还原真实事件细节</p>
+      <p class="text-secondary text-medium" style="margin-bottom:.7rem;" data-content="stage.behind.2">双语剧本 — 历经多稿打磨，兼顾中英语言的表达张力</p>
+      <p class="text-secondary text-medium" style="margin-bottom:.7rem;" data-content="stage.behind.3">团队排练 — 协调演员、舞美、灯光多方资源</p>
+      <p class="text-secondary text-medium" data-content="stage.behind.4">组织协调 — 统筹全局，确保演出顺利呈现</p>
+    </div>
+
+    <div class="stage-cell">
+      <h4>演出成果</h4>
+      <div class="stat-trio">
+        <div class="stat-item"><div class="num" data-content="stage.stat.shows">多场</div><div class="lbl">正式演出</div></div>
+        <div class="stat-item"><div class="num" data-content="stage.stat.audience">千+</div><div class="lbl">观众人数</div></div>
+        <div class="stat-item"><div class="num" data-content="stage.stat.views">万+</div><div class="lbl">短视频播放</div></div>
+      </div>
+      <div style="margin-top:2rem;">
+        <span class="media-pill">《深圳特区报》</span>
+        <span class="media-pill">《深圳晚报》</span>
+        <span class="media-pill" data-content="stage.media.more">更多媒体（预留）</span>
+      </div>
+    </div>
+
+    <div class="stage-cell">
+      <h4>素材展区</h4>
+      <p class="text-secondary text-medium" style="margin-bottom:1rem;">高清剧照 / 幕后花絮 / 媒体报道截图（预留位）</p>
+      <div style="aspect-ratio:16/9;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;color:#666;font-size:1.5rem;" id="img-stage-video" data-image="stage.video_thumb">▶</div>
+      <p class="text-secondary" style="font-size:.75rem;margin-top:.6rem;letter-spacing:.04em;">演出视频片段嵌入位</p>
+    </div>
+  </section>
+
+  <section class="padding-global" style="padding-top:4rem;padding-bottom:5rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot"></span>素材画廊 · SCROLL →</div>
+    <div class="scroll-gallery-wrap">
+      <div class="scroll-gallery" id="stageGallery">
+        <div class="scroll-card"><div class="scroll-card-img" id="img-stage-gallery-1" data-image="stage.gallery.1">剧照 01<br>预留位</div><div class="scroll-card-title">主舞台场景</div><div class="scroll-card-meta">高清剧照</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-stage-gallery-2" data-image="stage.gallery.2">剧照 02<br>预留位</div><div class="scroll-card-title">营救关键场次</div><div class="scroll-card-meta">高清剧照</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-stage-gallery-3" data-image="stage.gallery.3">花絮 01<br>预留位</div><div class="scroll-card-title">排练日常</div><div class="scroll-card-meta">幕后花絮</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-stage-gallery-4" data-image="stage.gallery.4">花絮 02<br>预留位</div><div class="scroll-card-title">服化道筹备</div><div class="scroll-card-meta">幕后花絮</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-stage-gallery-5" data-image="stage.gallery.5">报道截图<br>预留位</div><div class="scroll-card-title">《深圳特区报》</div><div class="scroll-card-meta">媒体报道</div></div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-bar"></div></div>
+  </section>
+</div>
+
+<!-- ══════════ PAGE 4 : MEDIA ══════════ -->
+<div class="page theme-light" id="media">
+  <header class="padding-global" style="padding-top:9rem;padding-bottom:3rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#009FFF;"></span>MEDIA WORKS · 自媒体空间</div>
+    <h1 class="h2">用镜头记录</h1>
+  </header>
+
+  <section class="platform-grid">
+    <div class="platform-cell">
+      <div class="platform-name">抖音</div>
+      <div class="platform-handle" data-content="media.douyin.handle">@待填写</div>
+      <p class="text-secondary text-medium" style="margin-bottom:1.5rem;">记录演唱会、话剧与大学生活，特色栏目「05后看演唱会」</p>
+      <a href="#" class="btn" id="link-douyin" data-content="media.douyin.url" data-href-target="link-douyin">前往主页</a>
+    </div>
+    <div class="platform-cell">
+      <div class="platform-name">小红书</div>
+      <div class="platform-handle" data-content="media.xhs.handle">@待填写</div>
+      <p class="text-secondary text-medium" style="margin-bottom:1.5rem;">双语学习分享、演唱会记录、海外交流见闻</p>
+      <a href="#" class="btn" id="link-xhs" data-content="media.xhs.url" data-href-target="link-xhs">前往主页</a>
+    </div>
+    <div class="platform-cell">
+      <div class="platform-name">哔哩哔哩</div>
+      <div class="platform-handle" data-content="media.bilibili.handle">@待填写</div>
+      <p class="text-secondary text-medium" style="margin-bottom:1.5rem;">话剧幕后、英语学习 vlog、赛事精彩回顾</p>
+      <a href="#" class="btn" id="link-bilibili" data-content="media.bilibili.url" data-href-target="link-bilibili">前往主页</a>
+    </div>
+  </section>
+
+  <section class="stat-bar-grid">
+    <div class="stat-bar-cell"><div class="num" data-content="media.stat.followers">——</div><div class="lbl">粉丝总量</div></div>
+    <div class="stat-bar-cell"><div class="num" data-content="media.stat.views">——</div><div class="lbl">总播放量</div></div>
+    <div class="stat-bar-cell"><div class="num" data-content="media.stat.likes">——</div><div class="lbl">获赞量</div></div>
+    <div class="stat-bar-cell"><div class="num" data-content="media.stat.hits">——</div><div class="lbl">爆款作品</div></div>
+  </section>
+
+  <section class="padding-global" style="padding-top:4rem;padding-bottom:5rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot"></span>精选作品 · SCROLL →</div>
+    <div class="scroll-gallery-wrap">
+      <div class="scroll-gallery">
+        <div class="scroll-card"><div class="scroll-card-img" id="img-media-work-1" data-image="media.work.1">封面 01<br>预留位</div><div class="scroll-card-title" data-content="media.work.1.title">05后看演唱会 · 第一期</div><div class="scroll-card-meta">抖音</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-media-work-2" data-image="media.work.2">封面 02<br>预留位</div><div class="scroll-card-title" data-content="media.work.2.title">作品标题（预留）</div><div class="scroll-card-meta">小红书</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-media-work-3" data-image="media.work.3">封面 03<br>预留位</div><div class="scroll-card-title" data-content="media.work.3.title">作品标题（预留）</div><div class="scroll-card-meta">B 站</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-media-work-4" data-image="media.work.4">封面 04<br>预留位</div><div class="scroll-card-title" data-content="media.work.4.title">作品标题（预留）</div><div class="scroll-card-meta">抖音</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" id="img-media-work-5" data-image="media.work.5">封面 05<br>预留位</div><div class="scroll-card-title" data-content="media.work.5.title">作品标题（预留）</div><div class="scroll-card-meta">小红书</div></div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-bar" style="background:var(--ink);width:30%;"></div></div>
+  </section>
+
+  <section class="padding-global" style="padding-bottom:6rem;">
+    <div class="hr" style="margin-bottom:2rem;"></div>
+    <p class="h5 max-w" style="font-style:italic;" data-content="media.note">
+      "（预留创作心得文案——记录你对内容创作的理解，拍摄与剪辑的感悟，以及自媒体这条路上的思考与成长……）"
+    </p>
+  </section>
+</div>
+
+<!-- ══════════ PAGE 5 : PORTFOLIO ══════════ -->
+<div class="page theme-light" id="portfolio">
+  <header class="padding-global" style="padding-top:9rem;padding-bottom:3rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#FC4C00;"></span>PORTFOLIO · 作品合集</div>
+    <h1 class="h2">我的创作</h1>
+  </header>
+
+  <section class="padding-global" style="padding-bottom:4rem;">
+    <div class="eyebrow-wrap" style="margin-bottom:.5rem;"><span class="eyebrow-dot"></span>文字作品</div>
+    <div class="text-list">
+      <div class="text-row"><span class="ttype">英文习作</span><span class="tname" data-content="portfolio.text.1">作品标题（预留填写）</span><span class="tlang">EN</span></div>
+      <div class="text-row"><span class="ttype">双语剧本</span><span class="tname">《生死营救》双语剧本节选</span><span class="tlang">中/EN</span></div>
+      <div class="text-row"><span class="ttype">演讲稿</span><span class="tname" data-content="portfolio.text.2">演讲稿标题（预留填写）</span><span class="tlang">EN</span></div>
+      <div class="text-row"><span class="ttype">口译文稿</span><span class="tname" data-content="portfolio.text.3">口译文稿（预留填写）</span><span class="tlang">中/EN</span></div>
+      <div class="text-row"><span class="ttype">自媒体文案</span><span class="tname" data-content="portfolio.text.4">精选文案合集（预留填写）</span><span class="tlang">中</span></div>
+      <div class="text-row"><span class="ttype">课程报告</span><span class="tname" data-content="portfolio.text.5">课程报告标题（预留填写）</span><span class="tlang">EN</span></div>
+    </div>
+  </section>
+
+  <section class="padding-global" style="padding-bottom:5rem;">
+    <div class="eyebrow-wrap" style="margin-bottom:.5rem;"><span class="eyebrow-dot"></span>影音作品 · SCROLL →</div>
+    <div class="scroll-gallery-wrap" style="padding:0;">
+      <div class="scroll-gallery">
+        <div class="scroll-card"><div class="scroll-card-img" style="aspect-ratio:16/9;">▶ 演讲现场<br>预留位</div><div class="scroll-card-title">演讲现场视频</div><div class="scroll-card-meta">赛事名称 · 年份</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" style="aspect-ratio:16/9;">▶ 舞台片段<br>预留位</div><div class="scroll-card-title">《生死营救》演出片段</div><div class="scroll-card-meta">舞台表演 · 2024</div></div>
+        <div class="scroll-card"><div class="scroll-card-img" style="aspect-ratio:16/9;">▶ 短视频<br>预留位</div><div class="scroll-card-title">自媒体短视频合集</div><div class="scroll-card-meta">抖音 / B站 · 精选</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="padding-global" style="padding-bottom:6rem;">
+    <div class="eyebrow-wrap" style="margin-bottom:1rem;"><span class="eyebrow-dot"></span>赛事风采</div>
+    <div class="about-grid" style="border-top:1px solid var(--line);">
+      <div class="about-cell" style="display:flex;gap:1.2rem;">
+        <div style="width:64px;height:64px;background:#EFEBDB;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--ink-soft);text-align:center;" id="img-portfolio-race-1" data-image="portfolio.race.1">照片<br>预留</div>
+        <div><div style="font-weight:400;margin-bottom:.3rem;">演讲比赛风采（预留）</div><div class="text-secondary" style="font-size:.85rem;" data-content="portfolio.race.1.desc">赛事名称、级别、获奖情况（预留填写）</div></div>
+      </div>
+      <div class="about-cell" style="display:flex;gap:1.2rem;">
+        <div style="width:64px;height:64px;background:#EFEBDB;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--ink-soft);text-align:center;" id="img-portfolio-race-2" data-image="portfolio.race.2">照片<br>预留</div>
+        <div><div style="font-weight:400;margin-bottom:.3rem;">辩论赛事（预留）</div><div class="text-secondary" style="font-size:.85rem;" data-content="portfolio.race.2.desc">赛事名称、参赛文稿相关信息（预留填写）</div></div>
+      </div>
+      <div class="about-cell" style="display:flex;gap:1.2rem;">
+        <div style="width:64px;height:64px;background:#EFEBDB;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--ink-soft);text-align:center;" id="img-portfolio-race-3" data-image="portfolio.race.3">照片<br>预留</div>
+        <div><div style="font-weight:400;margin-bottom:.3rem;">评委工作记录（预留）</div><div class="text-secondary" style="font-size:.85rem;" data-content="portfolio.race.3.desc">担任评委的赛事名称、时间、规模（预留填写）</div></div>
+      </div>
+      <div class="about-cell" style="display:flex;gap:1.2rem;">
+        <div style="width:64px;height:64px;background:#EFEBDB;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--ink-soft);text-align:center;" id="img-portfolio-race-4" data-image="portfolio.race.4">照片<br>预留</div>
+        <div><div style="font-weight:400;margin-bottom:.3rem;">更多赛事（预留）</div><div class="text-secondary" style="font-size:.85rem;" data-content="portfolio.race.4.desc">其他比赛记录（预留填写）</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ PAGE 6 : JOURNAL ══════════ -->
+<div class="page theme-light" id="journal">
+  <header class="padding-global" style="padding-top:9rem;padding-bottom:3rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#EE77CF;"></span>JOURNAL · 生活手记</div>
+    <h1 class="h2">一些碎片</h1>
+  </header>
+
+  <section class="journal-grid" id="journalGrid">
+    <!-- 随笔卡片由后台数据动态生成，下面是默认占位内容 -->
+  </section>
+
+  <div class="padding-global" style="padding-top:2.5rem;padding-bottom:5rem;">
+    <a href="https://oiumkefvbnhnccmwmaul.supabase.co" target="_blank" class="btn" style="opacity:.5;pointer-events:none;">＋ 写新随笔（请在后台管理添加）</a>
+  </div>
+</div>
+
+<!-- ══════════ PAGE 7 : CONTACT ══════════ -->
+<div class="page theme-dark" id="contact">
+  <header class="padding-global" style="padding-top:9rem;padding-bottom:3rem;">
+    <div class="eyebrow-wrap"><span class="eyebrow-dot" style="background:#FFD001;"></span>CONTACT · 联系我</div>
+    <h1 class="h2">来打招呼吧</h1>
+  </header>
+
+  <section class="padding-global contact-grid" style="padding-bottom:5rem;">
+    <div>
+      <div class="contact-row"><span class="lbl">手机号</span><span data-content="contact.phone">（预留填写）</span></div>
+      <div class="contact-row"><span class="lbl">邮箱</span><span data-content="contact.email">（预留填写）</span></div>
+
+      <div class="social-row">
+        <a href="#" class="social-pill" id="link-contact-douyin" data-content="media.douyin.url" data-href-target="link-contact-douyin">抖音</a>
+        <a href="#" class="social-pill" id="link-contact-xhs" data-content="media.xhs.url" data-href-target="link-contact-xhs">小红书</a>
+        <a href="#" class="social-pill" id="link-contact-bilibili" data-content="media.bilibili.url" data-href-target="link-contact-bilibili">B 站</a>
+      </div>
+
+      <a href="#" class="btn" id="link-resume" style="margin-top:2rem;width:100%;justify-content:center;" data-content="contact.resume_url" data-href-target="link-resume">
+        <span class="btn-icon">↓</span> 下载个人简历（PDF）
+      </a>
+    </div>
+
+    <div>
+      <div class="form-group">
+        <label class="form-label">你的名字</label>
+        <input type="text" class="form-input" id="cName" placeholder="请输入你的姓名">
+      </div>
+      <div class="form-group">
+        <label class="form-label">留言内容</label>
+        <textarea class="form-input" id="cMsg" rows="3" placeholder="有什么想说的，都可以留言～" style="resize:vertical;"></textarea>
+      </div>
+      <button class="btn" style="width:100%;justify-content:center;background:var(--white);color:var(--ink);" onclick="submitMessage()">
+        发送留言 →
+      </button>
+      <p id="msgFeedback" style="font-size:.82rem;color:#9be39b;margin-top:.8rem;display:none;"></p>
+    </div>
+  </section>
+
+  <section class="padding-global" style="padding-bottom:6rem;">
+    <div class="hr" style="background:#333;margin-bottom:2rem;"></div>
+    <div class="eyebrow-wrap"><span class="eyebrow-dot"></span>留言板 · GUESTBOOK</div>
+    <div id="guestbookList" style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1.2rem;">
+      <p class="text-secondary" style="font-size:.85rem;">加载中…</p>
+    </div>
+  </section>
+
+  <div class="padding-global footer-legal">
+    <span>© 2026 邱炜畅 Zion Qiu</span>
+    <span>用语言丈量世界，用舞台诠释人生</span>
+  </div>
+</div>
+
+<script>
+  // ---- page nav ----
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function navTo(id){
+    toggleMenu(false);
+    showPage(id);
+  }
+  function toggleMenu(open){
+    document.getElementById('menuOverlay').classList.toggle('open', open);
+  }
+
+  // ════════════════════════════════════════════════
+  // 动态内容加载：从 Supabase 拉取文字 / 图片 / 留言
+  // ════════════════════════════════════════════════
+
+  async function loadDynamicContent(){
+    if (typeof SB === 'undefined') return; // 配置文件未加载，使用页面默认值
+
+    // 1. 文字内容
+    const content = await SB.getAllContent();
+    document.querySelectorAll('[data-content]').forEach(el => {
+      const key = el.getAttribute('data-content');
+      if (content[key]) {
+        // 如果这个元素同时标记了 data-href-target，说明它是个链接，值要填进 href
+        const hrefTarget = el.getAttribute('data-href-target');
+        if (hrefTarget) {
+          el.setAttribute('href', content[key]);
+        } else {
+          el.textContent = content[key];
+        }
+      }
+    });
+
+    // 2. 图片
+    const images = await SB.getAllImages();
+    document.querySelectorAll('[data-image]').forEach(el => {
+      const key = el.getAttribute('data-image');
+      const img = images[key];
+      if (img && img.url) {
+        el.style.backgroundImage = `url('${img.url}')`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.textContent = '';
+      }
+    });
+
+    // 3. 随笔日常（动态渲染卡片）
+    await loadJournalEntries();
+
+    // 4. 留言板
+    await loadGuestbook();
+  }
+
+  async function loadJournalEntries(){
+    if (typeof SB === 'undefined') return;
+    const content = await SB.getAllContent();
+    const grid = document.getElementById('journalGrid');
+    if (!grid) return;
+
+    // 随笔条目以 journal.N.* 的 key 形式存储，N 从 1 开始，直到找不到为止
+    let html = '';
+    let n = 1;
+    let found = false;
+    while (true) {
+      const cat = content[`journal.${n}.cat`];
+      const title = content[`journal.${n}.title`];
+      if (!cat && !title) break;
+      found = true;
+      const excerpt = content[`journal.${n}.excerpt`] || '';
+      const date = content[`journal.${n}.date`] || '';
+      html += `
+        <div class="journal-cell">
+          <div class="journal-cat">${escapeHtml(cat||'随笔')}</div>
+          <div class="journal-title">${escapeHtml(title||'')}</div>
+          <div class="journal-excerpt">${escapeHtml(excerpt)}</div>
+          <div class="journal-date">${escapeHtml(date)}</div>
+        </div>`;
+      n++;
+      if (n > 60) break; // 安全上限
+    }
+    if (found) grid.innerHTML = html;
+    // 如果数据库里还没有任何随笔条目，保留 HTML 里原有的占位内容（如果有的话）
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  async function loadGuestbook(){
+    if (typeof SB === 'undefined') return;
+    const list = document.getElementById('guestbookList');
+    if (!list) return;
+    const messages = await SB.getPublicMessages();
+    if (!messages.length) {
+      list.innerHTML = `<p class="text-secondary" style="font-size:.85rem;">还没有留言，来留下第一条吧～</p>`;
+      return;
+    }
+    list.innerHTML = messages.map(m => {
+      const date = new Date(m.created_at).toLocaleDateString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit'});
+      return `
+        <div style="border-bottom:1px solid #2a2a2a;padding-bottom:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem;">
+            <span style="font-weight:400;color:#fff;">${escapeHtml(m.name)}</span>
+            <span style="font-size:.72rem;color:#777;letter-spacing:.04em;">${date}</span>
+          </div>
+          <div style="font-size:.92rem;color:#bbb;line-height:1.6;">${escapeHtml(m.message)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- contact form ----
+  async function submitMessage(){
+    const name = document.getElementById('cName').value.trim();
+    const msg = document.getElementById('cMsg').value.trim();
+    const feedback = document.getElementById('msgFeedback');
+    if(!name || !msg){ alert('请填写姓名和留言内容～'); return; }
+
+    if (typeof SB === 'undefined') {
+      alert(`谢谢 ${name} 的留言！(本地预览模式，未连接数据库)`);
+      document.getElementById('cName').value='';
+      document.getElementById('cMsg').value='';
+      return;
+    }
+
+    const ok = await SB.submitMessage(name, msg);
+    if (ok) {
+      feedback.textContent = `谢谢 ${name}，留言已收到 🤍`;
+      feedback.style.display = 'block';
+      document.getElementById('cName').value='';
+      document.getElementById('cMsg').value='';
+      await loadGuestbook();
+    } else {
+      alert('提交失败，请稍后再试～');
+    }
+  }
+
+  // 页面加载完成后拉取动态内容
+  document.addEventListener('DOMContentLoaded', loadDynamicContent);
+</script>
+
+</body>
+</html>

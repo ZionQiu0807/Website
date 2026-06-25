@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 · 邱炜畅个人网站</title>
+<script src="supabase-config.js"></script>
+<style>
+  :root{
+    --bg:#FFFEF7; --ink:#0A0A0A; --ink-soft:#666; --line:#DEDBC9;
+    --accent:#FFD001; --green:#2e7d32; --red:#c62828; --white:#FFFEF7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'PingFang SC','Hiragino Sans GB','Helvetica Neue',Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+  }
+
+  /* ---- login screen ---- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:1.2rem; padding:2rem;
+  }
+  #loginScreen h1{ font-size:1.4rem; font-weight:700; letter-spacing:-0.01em; }
+  #loginScreen p{ color:var(--ink-soft); font-size:.85rem; }
+  #loginScreen input{
+    width:280px; padding:.8rem 1rem; border:1px solid var(--line);
+    border-radius:8px; font-size:1rem; text-align:center;
+  }
+  #loginScreen input:focus{ outline:none; border-color:var(--ink); }
+  #loginScreen button{
+    width:280px; padding:.8rem; border:none; border-radius:8px;
+    background:var(--ink); color:var(--white); font-size:.9rem;
+    font-weight:600; cursor:pointer; letter-spacing:.04em;
+  }
+  #loginScreen button:hover{ opacity:.85; }
+  #loginError{ color:var(--red); font-size:.82rem; display:none; }
+
+  /* ---- admin shell ---- */
+  #adminShell{ display:none; }
+  .admin-header{
+    position:sticky; top:0; z-index:50;
+    background:var(--ink); color:var(--white);
+    padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:.8rem;
+  }
+  .admin-header h1{ font-size:1.05rem; font-weight:600; }
+  .admin-header .sub{ font-size:.72rem; color:#999; letter-spacing:.04em; }
+  .logout-btn{
+    background:transparent; border:1px solid #444; color:#ccc;
+    padding:.5rem 1rem; border-radius:100px; font-size:.78rem; cursor:pointer;
+  }
+  .logout-btn:hover{ border-color:#888; color:#fff; }
+
+  .tab-bar{
+    display:flex; gap:.5rem; padding:1rem 1.5rem; background:#fff;
+    border-bottom:1px solid var(--line); overflow-x:auto; position:sticky; top:60px; z-index:40;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    padding:.55rem 1.1rem; border-radius:100px; border:1px solid var(--line);
+    background:#fff; font-size:.82rem; cursor:pointer; white-space:nowrap;
+    font-family:inherit; color:var(--ink);
+  }
+  .tab-btn.active{ background:var(--ink); color:var(--white); border-color:var(--ink); }
+
+  .admin-body{ max-width:880px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .field-group{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:1.5rem; margin-bottom:1.2rem;
+  }
+  .field-group h3{ font-size:.95rem; font-weight:700; margin-bottom:1rem; }
+  .field-row{ margin-bottom:1rem; }
+  .field-row:last-child{ margin-bottom:0; }
+  .field-row label{
+    display:block; font-size:.74rem; color:var(--ink-soft); letter-spacing:.03em;
+    margin-bottom:.4rem;
+  }
+  .field-row input[type=text], .field-row textarea{
+    width:100%; padding:.65rem .8rem; border:1px solid var(--line); border-radius:8px;
+    font-size:.9rem; font-family:inherit; color:var(--ink); background:#fcfbf6;
+  }
+  .field-row textarea{ min-height:80px; resize:vertical; }
+  .field-row input:focus, .field-row textarea:focus{ outline:none; border-color:var(--ink); background:#fff; }
+
+  .save-bar{
+    position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line);
+    padding:1rem 1.5rem; display:flex; justify-content:flex-end; gap:.8rem;
+    margin-top:1rem;
+  }
+  .save-btn{
+    padding:.75rem 1.6rem; border-radius:100px; border:none;
+    background:var(--ink); color:var(--white); font-size:.85rem; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .save-btn:hover{ opacity:.85; }
+  .save-status{ font-size:.82rem; align-self:center; color:var(--green); }
+
+  /* image upload widget */
+  .img-upload-row{
+    display:flex; align-items:center; gap:1rem; margin-bottom:1rem;
+  }
+  .img-preview{
+    width:80px; height:80px; border-radius:8px; background:#EFEBDB;
+    border:1px solid var(--line); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; color:var(--ink-soft); text-align:center;
+    background-size:cover; background-position:center; overflow:hidden;
+  }
+  .img-upload-info{ flex:1; }
+  .img-upload-info .imgkey{ font-size:.85rem; font-weight:600; margin-bottom:.3rem; }
+  .img-upload-info input[type=file]{ font-size:.78rem; }
+  .img-status{ font-size:.74rem; color:var(--ink-soft); margin-top:.3rem; }
+
+  /* journal entries */
+  .journal-entry-card{
+    border:1px solid var(--line); border-radius:10px; padding:1.2rem; margin-bottom:1rem;
+    position:relative;
+  }
+  .journal-entry-card .remove-entry{
+    position:absolute; top:.8rem; right:.8rem;
+    background:transparent; border:none; color:var(--red); cursor:pointer; font-size:.78rem;
+  }
+  .add-entry-btn{
+    width:100%; padding:.8rem; border:2px dashed var(--line); border-radius:10px;
+    background:transparent; color:var(--ink-soft); cursor:pointer; font-size:.85rem;
+    font-family:inherit;
+  }
+  .add-entry-btn:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* guestbook moderation */
+  .gb-card{
+    border:1px solid var(--line); border-radius:10px; padding:1.2rem; margin-bottom:1rem;
+    background:#fff;
+  }
+  .gb-card.hidden-msg{ opacity:.5; background:#f5f5f5; }
+  .gb-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem; flex-wrap:wrap; gap:.5rem;}
+  .gb-name{ font-weight:700; font-size:.92rem; }
+  .gb-date{ font-size:.72rem; color:var(--ink-soft); }
+  .gb-msg{ font-size:.88rem; color:#333; line-height:1.6; margin-bottom:.8rem; }
+  .gb-actions{ display:flex; gap:.6rem; }
+  .gb-actions button{
+    font-size:.74rem; padding:.4rem .9rem; border-radius:100px; border:1px solid var(--line);
+    background:transparent; cursor:pointer; font-family:inherit; color:var(--ink-soft);
+  }
+  .gb-actions button.danger:hover{ border-color:var(--red); color:var(--red); }
+  .gb-actions button.toggle:hover{ border-color:var(--ink); color:var(--ink); }
+
+  .empty-note{ color:var(--ink-soft); font-size:.85rem; text-align:center; padding:2rem 0; }
+  .loading-note{ color:var(--ink-soft); font-size:.85rem; padding:1rem 0; }
+
+  @media (max-width:600px){
+    .admin-header{ flex-direction:column; align-items:flex-start; }
+    .tab-bar{ top:auto; position:static; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ LOGIN SCREEN ═══════ -->
+<div id="loginScreen">
+  <h1>🔒 后台管理登录</h1>
+  <p>邱炜畅个人网站 · Admin Panel</p>
+  <input type="password" id="passwordInput" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')tryLogin()">
+  <button onclick="tryLogin()">登录</button>
+  <p id="loginError">密码错误，请重试</p>
+</div>
+
+<!-- ═══════ ADMIN SHELL ═══════ -->
+<div id="adminShell">
+  <div class="admin-header">
+    <div>
+      <h1>邱炜畅个人网站 · 后台管理</h1>
+      <div class="sub">内容编辑 / 图片上传 / 留言板管理</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('home')">首页</button>
+    <button class="tab-btn" onclick="switchTab('about')">关于我</button>
+    <button class="tab-btn" onclick="switchTab('stage')">舞台创作</button>
+    <button class="tab-btn" onclick="switchTab('media')">自媒体</button>
+    <button class="tab-btn" onclick="switchTab('portfolio')">作品集</button>
+    <button class="tab-btn" onclick="switchTab('journal')">随笔日常</button>
+    <button class="tab-btn" onclick="switchTab('contact')">联系我</button>
+    <button class="tab-btn" onclick="switchTab('guestbook')">留言板 💬</button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- ───── HOME TAB ───── -->
+    <div class="tab-panel active" id="tab-home">
+      <div class="field-group">
+        <h3>头像与轮播图片</h3>
+        <div id="imgUploads-home"></div>
+      </div>
+      <div class="field-group">
+        <h3>基础信息文字</h3>
+        <div class="field-row"><label>就读院校（英文）</label><input type="text" data-key="home.school" placeholder="Shenzhen Technology University"></div>
+        <div class="field-row"><label>专业 / 年级</label><input type="text" data-key="home.major" placeholder="English · Class of 2027"></div>
+        <div class="field-row"><label>简介文案</label><textarea data-key="home.intro" placeholder="英语专业学子 · 双语创作者 ..."></textarea></div>
+        <div class="field-row"><label>个人 Slogan</label><textarea data-key="home.slogan" placeholder="用语言丈量世界，用舞台诠释人生"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ───── ABOUT TAB ───── -->
+    <div class="tab-panel" id="tab-about">
+      <div class="field-group">
+        <h3>个人简介</h3>
+        <div class="field-row"><label>籍贯</label><input type="text" data-key="about.hometown"></div>
+        <div class="field-row"><label>性格特质</label><input type="text" data-key="about.personality"></div>
+        <div class="field-row"><label>生活态度文案</label><textarea data-key="about.life_attitude"></textarea></div>
+      </div>
+      <div class="field-group">
+        <h3>教育经历</h3>
+        <div class="field-row"><label>GPA</label><input type="text" data-key="about.gpa" placeholder="例如：3.8/4.0"></div>
+        <div class="field-row"><label>专业排名</label><input type="text" data-key="about.rank" placeholder="例如：专业第3"></div>
+      </div>
+      <div class="field-group">
+        <h3>荣誉与履历</h3>
+        <div class="field-row"><label>国家级奖项 1</label><input type="text" data-key="about.honor.national.1"></div>
+        <div class="field-row"><label>国家级奖项 2</label><input type="text" data-key="about.honor.national.2"></div>
+        <div class="field-row"><label>省级奖项 1</label><input type="text" data-key="about.honor.provincial.1"></div>
+        <div class="field-row"><label>省级奖项 2</label><input type="text" data-key="about.honor.provincial.2"></div>
+        <div class="field-row"><label>市级及其他 1</label><input type="text" data-key="about.honor.city.1"></div>
+        <div class="field-row"><label>市级及其他 2</label><input type="text" data-key="about.honor.city.2"></div>
+      </div>
+    </div>
+
+    <!-- ───── STAGE TAB ───── -->
+    <div class="tab-panel" id="tab-stage">
+      <div class="field-group">
+        <h3>《生死营救》素材图片</h3>
+        <div id="imgUploads-stage"></div>
+      </div>
+      <div class="field-group">
+        <h3>项目基础</h3>
+        <div class="field-row"><label>合作单位</label><input type="text" data-key="stage.partner"></div>
+        <div class="field-row"><label>项目周期</label><input type="text" data-key="stage.duration"></div>
+        <div class="field-row"><label>创作背景</label><textarea data-key="stage.background"></textarea></div>
+      </div>
+      <div class="field-group">
+        <h3>创作与幕后（4 条）</h3>
+        <div class="field-row"><label>第 1 条</label><input type="text" data-key="stage.behind.1"></div>
+        <div class="field-row"><label>第 2 条</label><input type="text" data-key="stage.behind.2"></div>
+        <div class="field-row"><label>第 3 条</label><input type="text" data-key="stage.behind.3"></div>
+        <div class="field-row"><label>第 4 条</label><input type="text" data-key="stage.behind.4"></div>
+      </div>
+      <div class="field-group">
+        <h3>演出成果</h3>
+        <div class="field-row"><label>演出场次（如：12 场）</label><input type="text" data-key="stage.stat.shows"></div>
+        <div class="field-row"><label>观众人数（如：3000+）</label><input type="text" data-key="stage.stat.audience"></div>
+        <div class="field-row"><label>短视频播放量（如：5.2 万）</label><input type="text" data-key="stage.stat.views"></div>
+        <div class="field-row"><label>更多媒体报道（补充文字）</label><input type="text" data-key="stage.media.more"></div>
+      </div>
+    </div>
+
+    <!-- ───── MEDIA TAB ───── -->
+    <div class="tab-panel" id="tab-media">
+      <div class="field-group">
+        <h3>精选作品封面</h3>
+        <div id="imgUploads-media"></div>
+      </div>
+      <div class="field-group">
+        <h3>平台账号信息</h3>
+        <div class="field-row"><label>抖音账号名</label><input type="text" data-key="media.douyin.handle" placeholder="@你的抖音号"></div>
+        <div class="field-row"><label>抖音主页链接</label><input type="text" data-key="media.douyin.url" placeholder="https://..."></div>
+        <div class="field-row"><label>小红书账号名</label><input type="text" data-key="media.xhs.handle"></div>
+        <div class="field-row"><label>小红书主页链接</label><input type="text" data-key="media.xhs.url" placeholder="https://..."></div>
+        <div class="field-row"><label>B站账号名</label><input type="text" data-key="media.bilibili.handle"></div>
+        <div class="field-row"><label>B站主页链接</label><input type="text" data-key="media.bilibili.url" placeholder="https://..."></div>
+      </div>
+      <div class="field-group">
+        <h3>运营数据</h3>
+        <div class="field-row"><label>粉丝总量</label><input type="text" data-key="media.stat.followers"></div>
+        <div class="field-row"><label>视频总播放量</label><input type="text" data-key="media.stat.views"></div>
+        <div class="field-row"><label>获赞量</label><input type="text" data-key="media.stat.likes"></div>
+        <div class="field-row"><label>爆款作品数量</label><input type="text" data-key="media.stat.hits"></div>
+      </div>
+      <div class="field-group">
+        <h3>精选作品标题</h3>
+        <div class="field-row"><label>作品 1 标题</label><input type="text" data-key="media.work.1.title"></div>
+        <div class="field-row"><label>作品 2 标题</label><input type="text" data-key="media.work.2.title"></div>
+        <div class="field-row"><label>作品 3 标题</label><input type="text" data-key="media.work.3.title"></div>
+        <div class="field-row"><label>作品 4 标题</label><input type="text" data-key="media.work.4.title"></div>
+        <div class="field-row"><label>作品 5 标题</label><input type="text" data-key="media.work.5.title"></div>
+      </div>
+      <div class="field-group">
+        <h3>创作心得</h3>
+        <div class="field-row"><label>心得文案</label><textarea data-key="media.note"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ───── PORTFOLIO TAB ───── -->
+    <div class="tab-panel" id="tab-portfolio">
+      <div class="field-group">
+        <h3>赛事风采照片</h3>
+        <div id="imgUploads-portfolio"></div>
+      </div>
+      <div class="field-group">
+        <h3>文字作品标题（5 条）</h3>
+        <div class="field-row"><label>英文习作标题</label><input type="text" data-key="portfolio.text.1"></div>
+        <div class="field-row"><label>演讲稿标题</label><input type="text" data-key="portfolio.text.2"></div>
+        <div class="field-row"><label>口译文稿标题</label><input type="text" data-key="portfolio.text.3"></div>
+        <div class="field-row"><label>自媒体文案合集标题</label><input type="text" data-key="portfolio.text.4"></div>
+        <div class="field-row"><label>课程报告标题</label><input type="text" data-key="portfolio.text.5"></div>
+      </div>
+      <div class="field-group">
+        <h3>赛事风采描述（4 条）</h3>
+        <div class="field-row"><label>赛事 1 描述</label><input type="text" data-key="portfolio.race.1.desc"></div>
+        <div class="field-row"><label>赛事 2 描述</label><input type="text" data-key="portfolio.race.2.desc"></div>
+        <div class="field-row"><label>赛事 3 描述</label><input type="text" data-key="portfolio.race.3.desc"></div>
+        <div class="field-row"><label>赛事 4 描述</label><input type="text" data-key="portfolio.race.4.desc"></div>
+      </div>
+    </div>
+
+    <!-- ───── JOURNAL TAB ───── -->
+    <div class="tab-panel" id="tab-journal">
+      <div class="field-group">
+        <h3>随笔日常（可自由增删）</h3>
+        <div id="journalEditList"></div>
+        <button class="add-entry-btn" onclick="addJournalEntry()" style="margin-top:.5rem;">＋ 新增一条随笔</button>
+      </div>
+    </div>
+
+    <!-- ───── CONTACT TAB ───── -->
+    <div class="tab-panel" id="tab-contact">
+      <div class="field-group">
+        <h3>联系方式</h3>
+        <div class="field-row"><label>手机号</label><input type="text" data-key="contact.phone"></div>
+        <div class="field-row"><label>邮箱</label><input type="text" data-key="contact.email"></div>
+        <div class="field-row"><label>简历 PDF 链接（上传到 Storage 后填这里）</label><input type="text" data-key="contact.resume_url" placeholder="https://..."></div>
+      </div>
+      <div class="field-group">
+        <h3>简历文件上传</h3>
+        <input type="file" id="resumeUpload" accept="application/pdf">
+        <p class="img-status" id="resumeStatus"></p>
+      </div>
+    </div>
+
+    <!-- ───── GUESTBOOK TAB ───── -->
+    <div class="tab-panel" id="tab-guestbook">
+      <div class="field-group">
+        <h3>留言板管理</h3>
+        <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:1rem;">隐藏的留言不会在主站展示，但仍保留在数据库中；删除是永久操作。</p>
+        <div id="guestbookAdminList"><p class="loading-note">加载中…</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="save-bar" id="saveBar">
+    <span class="save-status" id="saveStatus"></span>
+    <button class="save-btn" onclick="saveCurrentTab()">💾 保存当前页面内容</button>
+  </div>
+</div>
+
+<script>
+  // ════════════════════════════════════════════
+  // 登录逻辑
+  // ════════════════════════════════════════════
+  function tryLogin(){
+    const input = document.getElementById('passwordInput').value;
+    if (typeof ADMIN_PASSWORD === 'undefined') {
+      alert('未找到配置文件 supabase-config.js，请确认它和 admin.html 放在同一文件夹下。');
+      return;
+    }
+    if (input === ADMIN_PASSWORD) {
+      sessionStorage.setItem('admin_logged_in', 'true');
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminShell').style.display = 'block';
+      initAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+  function logout(){
+    sessionStorage.removeItem('admin_logged_in');
+    location.reload();
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('admin_logged_in') === 'true') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminShell').style.display = 'block';
+      initAdmin();
+    }
+  });
+
+  // ════════════════════════════════════════════
+  // Tab 切换
+  // ════════════════════════════════════════════
+  function switchTab(name){
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    [...document.querySelectorAll('.tab-btn')].find(b => b.textContent.includes(tabLabel(name)))?.classList.add('active');
+    document.getElementById('saveBar').style.display = (name === 'guestbook') ? 'none' : 'flex';
+    currentTab = name;
+  }
+  function tabLabel(name){
+    const map = {home:'首页',about:'关于我',stage:'舞台创作',media:'自媒体',portfolio:'作品集',journal:'随笔日常',contact:'联系我',guestbook:'留言板'};
+    return map[name] || name;
+  }
+  let currentTab = 'home';
+
+  // ════════════════════════════════════════════
+  // 图片上传位定义：每个 tab 对应哪些 data-image key
+  // ════════════════════════════════════════════
+  const IMAGE_SLOTS = {
+    home: [
+      {key:'home.avatar', label:'头像照片'},
+      {key:'home.carousel.1', label:'轮播图 1 · 话剧剧照'},
+      {key:'home.carousel.2', label:'轮播图 2 · 自媒体封面'},
+      {key:'home.carousel.3', label:'轮播图 3 · 活动现场'},
+      {key:'home.carousel.4', label:'轮播图 4 · 生活随拍'},
+    ],
+    stage: [
+      {key:'stage.gallery.1', label:'剧照 01'},
+      {key:'stage.gallery.2', label:'剧照 02'},
+      {key:'stage.gallery.3', label:'花絮 01'},
+      {key:'stage.gallery.4', label:'花絮 02'},
+      {key:'stage.gallery.5', label:'报道截图'},
+      {key:'stage.video_thumb', label:'视频封面（演出片段）'},
+    ],
+    media: [
+      {key:'media.work.1', label:'作品封面 1'},
+      {key:'media.work.2', label:'作品封面 2'},
+      {key:'media.work.3', label:'作品封面 3'},
+      {key:'media.work.4', label:'作品封面 4'},
+      {key:'media.work.5', label:'作品封面 5'},
+    ],
+    portfolio: [
+      {key:'portfolio.race.1', label:'赛事照片 1'},
+      {key:'portfolio.race.2', label:'赛事照片 2'},
+      {key:'portfolio.race.3', label:'赛事照片 3'},
+      {key:'portfolio.race.4', label:'赛事照片 4'},
+    ]
+  };
+
+  let allImages = {};
+  let allContent = {};
+
+  async function initAdmin(){
+    document.getElementById('saveBar').style.display = 'flex';
+    allContent = await SB.getAllContent();
+    allImages = await SB.getAllImages();
+
+    // 填充所有文字输入框
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const key = el.getAttribute('data-key');
+      if (allContent[key] !== undefined) el.value = allContent[key];
+    });
+
+    // 渲染图片上传区
+    Object.keys(IMAGE_SLOTS).forEach(renderImageSlots);
+
+    // 渲染随笔编辑列表
+    renderJournalEditList();
+
+    // 渲染留言板管理
+    renderGuestbookAdmin();
+
+    // 简历上传监听
+    document.getElementById('resumeUpload').addEventListener('change', handleResumeUpload);
+  }
+
+  function renderImageSlots(tabName){
+    const container = document.getElementById('imgUploads-' + tabName);
+    if (!container) return;
+    container.innerHTML = '';
+    IMAGE_SLOTS[tabName].forEach(slot => {
+      const existing = allImages[slot.key];
+      const row = document.createElement('div');
+      row.className = 'img-upload-row';
+      row.innerHTML = `
+        <div class="img-preview" id="preview-${slot.key}" style="${existing ? `background-image:url('${existing.url}')` : ''}">
+          ${existing ? '' : '暂无图片'}
+        </div>
+        <div class="img-upload-info">
+          <div class="imgkey">${slot.label}</div>
+          <input type="file" accept="image/*" data-imgkey="${slot.key}">
+          <div class="img-status" id="status-${slot.key}"></div>
+        </div>`;
+      container.appendChild(row);
+      row.querySelector('input[type=file]').addEventListener('change', (e) => handleImageUpload(e, slot.key));
+    });
+  }
+
+  async function handleImageUpload(e, key){
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('status-' + key);
+    statusEl.textContent = '上传中…';
+    try {
+      const url = await SB.uploadFile(file, key.replace(/\./g, '_'));
+      const ok = await SB.setImage(key, url, key);
+      if (ok) {
+        statusEl.textContent = '✅ 上传成功';
+        document.getElementById('preview-' + key).style.backgroundImage = `url('${url}')`;
+        document.getElementById('preview-' + key).textContent = '';
+        allImages[key] = {url};
+      } else {
+        statusEl.textContent = '⚠️ 数据库记录保存失败';
+      }
+    } catch(err) {
+      statusEl.textContent = '❌ 上传失败：' + err.message;
+    }
+  }
+
+  async function handleResumeUpload(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('resumeStatus');
+    statusEl.textContent = '上传中…';
+    try {
+      const url = await SB.uploadFile(file, 'resume');
+      document.querySelector('[data-key="contact.resume_url"]').value = url;
+      statusEl.textContent = '✅ 上传成功，链接已自动填入，请记得点击保存';
+    } catch(err) {
+      statusEl.textContent = '❌ 上传失败：' + err.message;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // 文字内容保存
+  // ════════════════════════════════════════════
+  async function saveCurrentTab(){
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.textContent = '保存中…';
+    statusEl.style.color = '#666';
+
+    const panel = document.getElementById('tab-' + currentTab);
+    const inputs = panel ? panel.querySelectorAll('[data-key]') : [];
+
+    let allOk = true;
+    for (const el of inputs) {
+      const key = el.getAttribute('data-key');
+      const value = el.value;
+      const ok = await SB.setContent(key, value);
+      if (!ok) allOk = false;
+    }
+
+    // 随笔页保存单独处理
+    if (currentTab === 'journal') {
+      await saveJournalEntries();
+    }
+
+    statusEl.textContent = allOk ? '✅ 已保存' : '⚠️ 部分内容保存失败，请重试';
+    statusEl.style.color = allOk ? '#2e7d32' : '#c62828';
+    setTimeout(() => { statusEl.textContent=''; }, 3000);
+  }
+
+  // ════════════════════════════════════════════
+  // 随笔日常：动态条目编辑
+  // ════════════════════════════════════════════
+  let journalCount = 0;
+
+  function renderJournalEditList(){
+    const list = document.getElementById('journalEditList');
+    list.innerHTML = '';
+    journalCount = 0;
+    // 找出已有的随笔条目（journal.N.title 存在）
+    let n = 1;
+    while (allContent[`journal.${n}.title`] !== undefined || allContent[`journal.${n}.cat`] !== undefined) {
+      addJournalEntry(n);
+      n++;
+    }
+    if (n === 1) addJournalEntry(1); // 至少给一个空白条目
+  }
+
+  function addJournalEntry(n){
+    journalCount = Math.max(journalCount, n || (journalCount+1));
+    const idx = n || journalCount;
+    const list = document.getElementById('journalEditList');
+    const card = document.createElement('div');
+    card.className = 'journal-entry-card';
+    card.dataset.idx = idx;
+    card.innerHTML = `
+      <button class="remove-entry" onclick="this.closest('.journal-entry-card').remove()">✕ 删除</button>
+      <div class="field-row"><label>分类（如：学习随笔 / 日常手记 / 兴趣分享）</label>
+        <input type="text" class="j-cat" value="${escapeAttr(allContent[`journal.${idx}.cat`]||'')}"></div>
+      <div class="field-row"><label>标题</label>
+        <input type="text" class="j-title" value="${escapeAttr(allContent[`journal.${idx}.title`]||'')}"></div>
+      <div class="field-row"><label>正文摘要</label>
+        <textarea class="j-excerpt">${escapeAttr(allContent[`journal.${idx}.excerpt`]||'')}</textarea></div>
+      <div class="field-row"><label>日期</label>
+        <input type="text" class="j-date" value="${escapeAttr(allContent[`journal.${idx}.date`]||'')}" placeholder="例如：2025.05"></div>
+    `;
+    list.appendChild(card);
+  }
+
+  function escapeAttr(str){
+    return String(str||'').replace(/"/g,'&quot;');
+  }
+
+  async function saveJournalEntries(){
+    const cards = document.querySelectorAll('#journalEditList .journal-entry-card');
+    let i = 1;
+    for (const card of cards) {
+      const cat = card.querySelector('.j-cat').value;
+      const title = card.querySelector('.j-title').value;
+      const excerpt = card.querySelector('.j-excerpt').value;
+      const date = card.querySelector('.j-date').value;
+      await SB.setContent(`journal.${i}.cat`, cat);
+      await SB.setContent(`journal.${i}.title`, title);
+      await SB.setContent(`journal.${i}.excerpt`, excerpt);
+      await SB.setContent(`journal.${i}.date`, date);
+      i++;
+    }
+    // 清空多余的旧条目（如果之前条目比现在多）
+    let n = i;
+    while (allContent[`journal.${n}.title`] !== undefined) {
+      await SB.setContent(`journal.${n}.cat`, '');
+      await SB.setContent(`journal.${n}.title`, '');
+      await SB.setContent(`journal.${n}.excerpt`, '');
+      await SB.setContent(`journal.${n}.date`, '');
+      n++;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // 留言板管理
+  // ════════════════════════════════════════════
+  async function renderGuestbookAdmin(){
+    const container = document.getElementById('guestbookAdminList');
+    const messages = await SB.getAllMessages();
+    if (!messages.length) {
+      container.innerHTML = '<p class="empty-note">还没有任何留言</p>';
+      return;
+    }
+    container.innerHTML = messages.map(m => {
+      const date = new Date(m.created_at).toLocaleString('zh-CN');
+      return `
+        <div class="gb-card ${m.is_hidden ? 'hidden-msg' : ''}" id="gb-${m.id}">
+          <div class="gb-top">
+            <span class="gb-name">${escapeAttr(m.name)} ${m.is_hidden ? '（已隐藏）' : ''}</span>
+            <span class="gb-date">${date}</span>
+          </div>
+          <div class="gb-msg">${escapeAttr(m.message)}</div>
+          <div class="gb-actions">
+            <button class="toggle" onclick="toggleMsg(${m.id}, ${!m.is_hidden})">${m.is_hidden ? '取消隐藏' : '隐藏此留言'}</button>
+            <button class="danger" onclick="deleteMsg(${m.id})">永久删除</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function toggleMsg(id, hidden){
+    await SB.toggleMessageHidden(id, hidden);
+    renderGuestbookAdmin();
+  }
+  async function deleteMsg(id){
+    if (!confirm('确定要永久删除这条留言吗？此操作无法撤销。')) return;
+    await SB.deleteMessage(id);
+    renderGuestbookAdmin();
+  }
+</script>
+
+</body>
+</html>
