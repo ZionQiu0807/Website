@@ -12,12 +12,12 @@
 }
 
 :root{
-  --bg: #FFFEF7;
-  --ink: #0A0A0A;
-  --ink-soft: #555;
-  --line: #DEDBC9;
-  --accent: #FFD001;
-  --white: #FFFEF7;
+  --bg: #1a1a1a;
+  --ink: #00FFD1;
+  --ink-soft: #888888;
+  --line: #333333;
+  --accent: #FF00FF;
+  --white: #EEEEEE;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -68,15 +68,16 @@ img{max-width:100%;display:block;}
 }
 
 .menu-overlay{
-  position:fixed; inset:0;
-  background:var(--ink);
-  color:var(--white);
-  z-index:600;
-  display:none;
-  flex-direction:column;
-  justify-content:space-between;
-  padding:7rem 2rem 2.5rem;
-}
+    position:fixed; inset:0;
+    background:var(--ink);
+    color:var(--white);
+    z-index:600;
+    display:none;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:7rem 2rem 2.5rem;
+    overflow-y:auto; /* 允许垂直滚动 */
+  }
 .menu-overlay.open{ display:flex; }
 .menu-close{
   position:absolute; top:1.4rem; right:2rem;
